@@ -87,6 +87,22 @@ namespace Microsoft.Azure.Commands.Media.MediaService
         public string Location { get; set; }
 
         [Parameter(
+            Position = 4,
+            Mandatory = false,
+            ParameterSetName = PrimaryStorageAccountParamSet,
+            ValueFromPipelineByPropertyName = true,
+            HelpMessage = "The managed identity.")]
+        [Parameter(
+            Position = 4,
+            Mandatory = false,
+            ParameterSetName = StorageAccountsParamSet,
+            ValueFromPipelineByPropertyName = true,
+            HelpMessage = "The managed identity.")]
+        [LocationCompleter("Microsoft.Media/mediaservices")]
+        [ValidateNotNullOrEmpty]
+        public string ManagedIdentity { get; set; }
+
+        [Parameter(
             Position = 3,
             Mandatory = true,
             ParameterSetName = PrimaryStorageAccountParamSet,
@@ -117,7 +133,7 @@ namespace Microsoft.Azure.Commands.Media.MediaService
             {
                 try
                 {
-                    var mediaService = MediaServicesManagementClient.MediaService.Get(ResourceGroupName, AccountName);
+                    var mediaService = MediaServicesManagementClient.Mediaservices.Get(ResourceGroupName, AccountName);
                     if (mediaService != null)
                     {
                         throw new ArgumentException(string.Format(Properties.Resource.InvalidMediaServiceAccount,
@@ -132,10 +148,13 @@ namespace Microsoft.Azure.Commands.Media.MediaService
                     {
                         var restMediaService = new RestMediaService(
                             Location,
-                            Tag.ToDictionaryTags(),
                             null,
                             null,
-                            MediaServiceType);
+                            MediaServiceType,
+                            Tag.ToDictionaryTags()
+                            );
+
+                        restMediaService.Identity = new MediaServiceIdentity(ManagedIdentity);
 
                         switch (ParameterSetName)
                         {
@@ -145,7 +164,7 @@ namespace Microsoft.Azure.Commands.Media.MediaService
                                 new StorageAccount
                                 {
                                     Id = StorageAccountId,
-                                    IsPrimary = true
+                                    Type = StorageAccountType.Primary
                                 }
                             };
                                 break;
@@ -163,7 +182,7 @@ namespace Microsoft.Azure.Commands.Media.MediaService
                                 throw new ArgumentException("Bad ParameterSet Name");
                         }
 
-                        var mediaServiceCreated = MediaServicesManagementClient.MediaService.Create(ResourceGroupName, AccountName, restMediaService);
+                        var mediaServiceCreated = MediaServicesManagementClient.Mediaservices.CreateOrUpdate(ResourceGroupName, AccountName, restMediaService);
                         WriteObject(mediaServiceCreated.ToPSMediaService(), true);
                     }
                     else

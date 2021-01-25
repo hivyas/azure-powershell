@@ -25,7 +25,7 @@ namespace Microsoft.Azure.Commands.Media.Common
     /// </summary>
     public class AzureMediaServiceCmdletBase : AzureRMCmdlet
     {
-        private IMediaServicesManagementClient _mediaServicesManagementClient;
+        private IAzureMediaServicesClient _mediaServicesManagementClient;
 
         protected const string MediaServiceNameAvailabilityStr = "AzureRmMediaServiceNameAvailability";
         protected const string MediaServiceNounStr = "AzureRmMediaService";
@@ -42,12 +42,12 @@ namespace Microsoft.Azure.Commands.Media.Common
         /// <summary>
         /// Get the media service client 
         /// </summary>
-        protected IMediaServicesManagementClient MediaServicesManagementClient
+        protected IAzureMediaServicesClient MediaServicesManagementClient
         {
             get
             {
                 return _mediaServicesManagementClient ??
-                       (_mediaServicesManagementClient = AzureSession.Instance.ClientFactory.CreateArmClient<MediaServicesManagementClient>(DefaultProfile.DefaultContext, 
+                       (_mediaServicesManagementClient = AzureSession.Instance.ClientFactory.CreateArmClient<AzureMediaServicesClient>(DefaultProfile.DefaultContext, 
                        AzureEnvironment.Endpoint.ResourceManager));
             }
         }

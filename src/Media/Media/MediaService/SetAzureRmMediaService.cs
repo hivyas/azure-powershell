@@ -87,7 +87,7 @@ namespace Microsoft.Azure.Commands.Media.MediaService
                         throw new ArgumentException(Properties.Resource.OnlyOnePrimaryStorageAccountAllowed);
                     }
 
-                    var mediaService = MediaServicesManagementClient.MediaService.Get(ResourceGroupName, AccountName);
+                    var mediaService = MediaServicesManagementClient.Mediaservices.Get(ResourceGroupName, AccountName);
                     if (mediaService == null)
                     {
                         throw new ArgumentException(string.Format(Properties.Resource.InvalidMediaServiceAccount,
@@ -96,7 +96,7 @@ namespace Microsoft.Azure.Commands.Media.MediaService
                             ResourceGroupName));
                     }
 
-                    var primaryStorageAccount = mediaService.StorageAccounts.FirstOrDefault(x => (x.IsPrimary.HasValue && x.IsPrimary.Value));
+                    var primaryStorageAccount = mediaService.StorageAccounts.FirstOrDefault(x => (x.Type == StorageAccountType.Primary));
                     // there must be a primary storage account associated with the media service account
                     if (primaryStorageAccount == null)
                     {
@@ -117,7 +117,7 @@ namespace Microsoft.Azure.Commands.Media.MediaService
 
                 try
                 {
-                    var mediaServiceUpdated = MediaServicesManagementClient.MediaService.Update(ResourceGroupName,
+                    var mediaServiceUpdated = MediaServicesManagementClient.Mediaservices.CreateOrUpdate(ResourceGroupName,
                                 AccountName, mediaServiceParams);
                     WriteObject(mediaServiceUpdated.ToPSMediaService(), true);
                 }
